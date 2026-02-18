@@ -102,7 +102,6 @@ void SRTF(vector<Process> &process, int processAmount) {
             if(cur.arrivalTime <= timeElapsed && min > cur.remainingTime && !cur.finished) {
                 min = cur.remainingTime;
                 shortestIdx = i;
-                // if the process has never been touched, then register that it has been touched
             }
         }
         // cpu is idle, no process in ready queue
@@ -117,6 +116,7 @@ void SRTF(vector<Process> &process, int processAmount) {
             }
             timeCont = 0; // reset continuous run time for the new process
         }
+        // if the process has never been touched, then register that it has been touched
         if(process[shortestIdx].burstTime == process[shortestIdx].remainingTime) {
             process[shortestIdx].responseTime = timeElapsed - process[shortestIdx].arrivalTime;
         }
