@@ -102,9 +102,7 @@ void SRTF(vector<Process> &process, int processAmount) {
             if(cur.arrivalTime <= timeElapsed && min > cur.remainingTime && !cur.finished) {
                 min = cur.remainingTime;
                 shortestIdx = i;
-                if(cur.burstTime == cur.remainingTime) {
-                    cur.responseTime = timeElapsed - cur.arrivalTime;
-                }
+                // if the process has never been touched, then register that it has been touched
             }
         }
         // cpu is idle, no process in ready queue
@@ -119,6 +117,9 @@ void SRTF(vector<Process> &process, int processAmount) {
             }
             timeCont = 0; // reset continuous run time for the new process
         }
+        if(process[shortestIdx].burstTime == process[shortestIdx].remainingTime) {
+            process[shortestIdx].responseTime = timeElapsed - process[shortestIdx].arrivalTime;
+        }
         // increment waiting processes if they are idle and have arrived
         for(int i = 0; i < processAmount; i++) {
             Process& cur = process[i];
@@ -131,7 +132,7 @@ void SRTF(vector<Process> &process, int processAmount) {
         // if the process is complete
         if(process[shortestIdx].remainingTime == 0) {
             process[shortestIdx].finished = true;
-            process[shortestIdx].completionTime = timeElapsed + 1;
+            process[shortestIdx].completionTime = timeElapsed + 1; // completed it at THIS loop so +1
             process[shortestIdx].turnaroundTime = process[shortestIdx].completionTime - process[shortestIdx].arrivalTime;
             completed++;
         }
@@ -198,7 +199,7 @@ int main() {
         } else if(algorithm == "P") {
             P(process, processAmount);
         } else if(algorithm == "RR") {
-            RR(process, processAmount, time);
+            RR(process, processAmount, timeQuantum);
         } else {
             cout << "Algorithm does not exist." << endl;
         }
