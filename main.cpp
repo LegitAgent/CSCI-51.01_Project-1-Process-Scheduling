@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <climits>
+#include <queue>
 using namespace std;
 
 struct Process {
@@ -75,7 +76,46 @@ void printStats(vector<Process> &process, int timeElapsed) {
 
 // TODO:
 void FCFS(vector<Process> &process, int processAmount) {
+    int timeElapsed = 0;
+    int timeCont = 0;
+    int completed = 0;
 
+    // FCFS simulation while loop
+
+    int curIdx = -1;
+    bool processing = false;
+    queue<int> readyQ;
+
+    while(completed != processAmount){
+
+        // push process into ready queue
+        for(int i = 0; i < processAmount; i++){
+            Process& p = process[i];
+            if(p.arrivalTime == timeElapsed){
+                readyQ.push(i);
+            }
+        }
+
+        // put process into CPU if possible
+        if(!processing && readyQ.size() != 0){
+            curIdx = readyQ.front();
+            readyQ.pop();
+            processing = true;
+        }
+
+        // if CPU is empty and ready queue is empty, go next
+        if(readyQ.size() == 0 && !processing){
+            timeElapsed++;
+            continue;
+        }
+
+        // adjust values of current process (process the process)
+        // WIP
+        
+        // increment internal timer
+        timeElapsed++;
+        timeCont++;
+    }
 }
 
 // TODO:
