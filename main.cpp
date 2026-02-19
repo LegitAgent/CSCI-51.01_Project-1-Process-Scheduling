@@ -96,6 +96,11 @@ void FCFS(vector<Process> &process, int processAmount) {
             }
         }
 
+        // current process is terminated, CPU stops processing
+        if(processing && process[curIdx].remainingTime <= 0){
+            processing = false;
+        }
+
         // put process into CPU if possible
         if(!processing && readyQ.size() != 0){
             curIdx = readyQ.front();
