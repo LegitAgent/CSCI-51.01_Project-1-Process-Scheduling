@@ -96,9 +96,10 @@ void FCFS(vector<Process> &process, int processAmount) {
             }
         }
 
-        // current process is terminated, CPU stops processing
-        if(processing && process[curIdx].remainingTime <= 0){
-            processing = false;
+        // if CPU is empty and ready queue is empty, go next
+        if(readyQ.size() == 0 && !processing){
+            timeElapsed++;
+            continue;
         }
 
         // put process into CPU if possible
@@ -108,19 +109,25 @@ void FCFS(vector<Process> &process, int processAmount) {
             processing = true;
         }
 
-        // if CPU is empty and ready queue is empty, go next
-        if(readyQ.size() == 0 && !processing){
-            timeElapsed++;
-            continue;
-        }
 
-        // adjust values of current process (process the process)
-        // WIP
+        // if CPU is currently running a process:
+        if(processing){
+            process[curIdx].remainingTime--;
+            if(process[curIdx].remainingTime == 0) {
+                process[curIdx].finished = true;
+                process[curIdx].completionTime = timeElapsed + 1; // completed it at THIS loop so +1
+                process[curIdx].turnaroundTime = process[curIdx].completionTime - process[curIdx].arrivalTime;
+                process[curIdx].waitingTime = process[curIdx].turnaroundTime - process[curIdx].burstTime;
+                completed++;
+            }
+        }
         
         // increment internal timer
         timeElapsed++;
         timeCont++;
     }
+
+    printStats(process, timeElapsed);
 }
 
 // TODO:
