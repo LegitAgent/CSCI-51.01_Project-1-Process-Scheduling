@@ -80,12 +80,12 @@ void FCFS(vector<Process> &process, int processAmount) {
     int timeCont = 0;
     int completed = 0;
 
-    // FCFS simulation while loop
-
+    // variables and data structures used for 'simulation'
     int curIdx = -1;
     bool processing = false;
     queue<int> readyQ;
 
+    // 'simulating' processes
     while(completed != processAmount){
 
         // push process into ready queue
@@ -96,29 +96,32 @@ void FCFS(vector<Process> &process, int processAmount) {
             }
         }
 
-        // put process into CPU if possible
+        // put process into 'CPU' if possible
         if(!processing && readyQ.size() != 0){
             curIdx = readyQ.front();
             readyQ.pop();
             processing = true;
+            process[curIdx].responseTime = timeElapsed - process[curIdx].arrivalTime;
         }
 
         // if CPU is currently running a process:
         if(processing){
             process[curIdx].remainingTime--;
+            timeCont++;
             if(process[curIdx].remainingTime == 0) {
                 process[curIdx].finished = true;
-                process[curIdx].completionTime = timeElapsed + 1; // completed it at THIS loop so +1
+                process[curIdx].completionTime = timeElapsed+1; // completed it at THIS loop so +1
                 process[curIdx].turnaroundTime = process[curIdx].completionTime - process[curIdx].arrivalTime;
                 process[curIdx].waitingTime = process[curIdx].turnaroundTime - process[curIdx].burstTime;
                 processing = false;
+                printGanttChart(timeElapsed+1, timeCont, curIdx, process[curIdx]);
                 completed++;
+                timeCont = 0;
             }
         }
-        
-        // increment internal timer
+
+        // increment time elapsed
         timeElapsed++;
-        timeCont++;
     }
 
     printStats(process, timeElapsed);
@@ -126,7 +129,26 @@ void FCFS(vector<Process> &process, int processAmount) {
 
 // TODO:
 void SJF(vector<Process> &process, int processAmount) {
+    int timeElapsed = 0;
+    int timeCont = 0;
+    int completed = 0;
 
+    // variables and data structures used for 'simulation'
+    int curIdx = -1;
+    bool processing = false;
+    vector<int> readyQ;
+    
+    // simulation
+    while(completed != processAmount){
+        
+        // push process into ready queue
+
+        // put process with smallest runtime into CPU
+
+        // if CPU is currently running a process
+        
+        // increment time elapsed
+    }
 }
 
 /* Limitations:
