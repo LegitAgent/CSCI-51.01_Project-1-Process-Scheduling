@@ -74,7 +74,7 @@ void printStats(vector<Process> &process, int timeElapsed) {
     cout << "Average response time: " << totalResponseTime / processSize << "ns" << endl;
 }
 
-// TODO:
+// functional, but needs to be tested
 void FCFS(vector<Process> &process, int processAmount) {
     int timeElapsed = 0;
     int timeCont = 0;
@@ -88,7 +88,7 @@ void FCFS(vector<Process> &process, int processAmount) {
     // 'simulating' processes
     while(completed != processAmount){
 
-        // push process into ready queue
+        // push process into ready queue if possible
         for(int i = 0; i < processAmount; i++){
             Process& p = process[i];
             if(p.arrivalTime == timeElapsed){
@@ -136,19 +136,79 @@ void SJF(vector<Process> &process, int processAmount) {
     // variables and data structures used for 'simulation'
     int curIdx = -1;
     bool processing = false;
-    vector<int> readyQ;
-    
+    int readyQ[processAmount];
+    for(int i = 0; i < processAmount; i++){
+        readyQ[i] = -1;
+    }
+    bool emptyQ = true;
+
     // simulation
     while(completed != processAmount){
         
         // push process into ready queue
+        for(int i = 0; i < processAmount; i++){
+            Process& p = process[i];
+            if(p.arrivalTime == timeElapsed){
+                for(int j = 0; j < processAmount; j++){
+                    if(readyQ[j] == -1){
+                        readyQ[j] = i;
+                        cout << i << endl;
+                        break;
+                    }
+                }
+                emptyQ = false;
+            }
+        }
+
+        // check if ready queue is empty
+        for(int i = 0; i < processAmount; i++){
+            if(readyQ[i] != -1){
+                emptyQ = false;
+            }
+        }
 
         // put process with smallest runtime into CPU
+        if(!processing && !emptyQ){
+            int min = INT_MAX;
+            int readyIdx = -1;
+            for(int i = 0; i < processAmount; i++){
+                if(readyQ[i] == -1){
+                    cout << "empty!" << endl;
+                    continue;
+                }
+                if(min > process[readyQ[i]].remainingTime){
+                    cout << readyQ[i] << ": " << process[readyQ[i]].remainingTime << "<" << min << endl;
+                    min = process[readyQ[i]].remainingTime;
+                    curIdx = readyQ[i];
+                    readyIdx = i;
+                }
+            }
+            processing = true;
+            readyQ[readyIdx] = -1;
+            process[curIdx].responseTime = timeElapsed - process[curIdx].arrivalTime;
+        }
 
-        // if CPU is currently running a process
-        
+        // if CPU is currently running a process:
+        if(processing){
+            process[curIdx].remainingTime--;
+            timeCont++;
+            if(process[curIdx].remainingTime == 0) {
+                process[curIdx].finished = true;
+                process[curIdx].completionTime = timeElapsed+1; // completed it at THIS loop so +1
+                process[curIdx].turnaroundTime = process[curIdx].completionTime - process[curIdx].arrivalTime;
+                process[curIdx].waitingTime = process[curIdx].turnaroundTime - process[curIdx].burstTime;
+                processing = false;
+                printGanttChart(timeElapsed+1, timeCont, curIdx, process[curIdx]);
+                completed++;
+                timeCont = 0;
+            }
+        }
+
         // increment time elapsed
+        timeElapsed++;
     }
+
+    printStats(process, timeElapsed);
 }
 
 /* Limitations:
