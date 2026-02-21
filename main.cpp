@@ -161,7 +161,6 @@ void P(vector<Process> &process, int processAmount) {
 
         for (int i = 0; i < processAmount; i++) {
             Process& selectedProcess = process[i];
-            
             // find the process that arrived and that have not reached remaining time of zero
             if( selectedProcess.arrivalTime <= timeElapsed && selectedProcess.remainingTime > 0 ) {
             // check if priority level of the selected process is less than the one currently prioritized, or initializes it to zero if still in -1   
@@ -174,22 +173,25 @@ void P(vector<Process> &process, int processAmount) {
                     }
                     else prioritizedIndex = i;
                }
-                
             }
         }
 
+        // cpu is idle, no process in ready queue
         if (prioritizedIndex == -1) {
             timeElapsed++;
             continue;
         }
 
+        // if the process is different, print previous
         if (prioritizedIndex != prevIdx) {
             if (prevIdx != -1) printGanttChart(timeElapsed, timeCont, prevIdx, process[prevIdx]);
             timeCont = 0;
         }
 
+        // decrement remainting for process
         process[prioritizedIndex].remainingTime--;
 
+        // if the process is complete
         if (process[prioritizedIndex].remainingTime == 0) {
             process[prioritizedIndex].finished = true;
             process[prioritizedIndex].completionTime = timeElapsed + 1;
