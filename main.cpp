@@ -39,7 +39,7 @@ void printStats(vector<Process> &process, int timeElapsed) {
     cout << "Total CPU burst time: " << totalCPUBurstTime << "ns" << endl;
     
     // total cpu utilization
-    float cpuUtil = totalCPUBurstTime / timeElapsed * 100;
+    float cpuUtil = ((float)totalCPUBurstTime / (float)timeElapsed) * 100;
     cout << "CPU Utilization: " << cpuUtil << "%" << endl;
 
     // throughput
