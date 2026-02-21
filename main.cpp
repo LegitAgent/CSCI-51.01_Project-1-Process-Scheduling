@@ -152,7 +152,6 @@ void SJF(vector<Process> &process, int processAmount) {
                 for(int j = 0; j < processAmount; j++){
                     if(readyQ[j] == -1){
                         readyQ[j] = i;
-                        cout << i << endl;
                         break;
                     }
                 }
@@ -161,6 +160,7 @@ void SJF(vector<Process> &process, int processAmount) {
         }
 
         // check if ready queue is empty
+        emptyQ = true;
         for(int i = 0; i < processAmount; i++){
             if(readyQ[i] != -1){
                 emptyQ = false;
@@ -173,11 +173,9 @@ void SJF(vector<Process> &process, int processAmount) {
             int readyIdx = -1;
             for(int i = 0; i < processAmount; i++){
                 if(readyQ[i] == -1){
-                    cout << "empty!" << endl;
                     continue;
                 }
                 if(min > process[readyQ[i]].remainingTime){
-                    cout << readyQ[i] << ": " << process[readyQ[i]].remainingTime << "<" << min << endl;
                     min = process[readyQ[i]].remainingTime;
                     curIdx = readyQ[i];
                     readyIdx = i;
