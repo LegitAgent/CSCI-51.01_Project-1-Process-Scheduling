@@ -278,6 +278,25 @@ void P(vector<Process> &process, int processAmount) {
 
     int prevIdx = -1;
 
+    // check if there are off-limit processes
+    for (int i = 0; i < processAmount; i++) {
+        Process& selectedProcess = process[i];
+
+        if ( selectedProcess.arrivalTime < 0 ) {
+            cout << "The process at index " << i + 1 << " has gone back in time!\n"
+            << "Retrieve the processes from the past and try again." << endl;
+            return;
+        } else if ( selectedProcess.burstTime < 1 ) {
+            cout << "The process at index " << i + 1 << " has a burst time of zero or less.\n"
+            << "Increase the burst time of the processes and try again." << endl;
+            return;
+        } else if ( selectedProcess.prioLevel > 20 || selectedProcess.prioLevel < -20 ) {
+            cout << "The process at index " << i + 1 << " has a priority level beyond -20 or 20.\n"
+            << "Place processes within the range -20 to 20 and try again." << endl;
+            return;
+        }
+    }
+
     while (completed != processAmount) {
         int prioritizedIndex = -1;
 
@@ -286,23 +305,7 @@ void P(vector<Process> &process, int processAmount) {
             // find the process that arrived and that have not reached remaining time of zero
             if( selectedProcess.arrivalTime <= timeElapsed && selectedProcess.remainingTime > 0 ) {
             // check if priority level of the selected process is less than the one currently prioritized, or initializes it to zero if still in -1   
-                if ( prioritizedIndex == -1 || selectedProcess.prioLevel < process[prioritizedIndex].prioLevel ) {
-            // check if process that got selected has a priority within -20 to 20.
-                    if ( selectedProcess.arrivalTime < 0 ) {
-                        cout << "The process at index " << i + 1 << " has gone back in time!\n"
-                        << "Retrieve the processes from the past and try again." << endl;
-                        return;
-                    } else if ( selectedProcess.burstTime < 1 ) {
-                        cout << "The process at index " << i + 1 << " has a burst time of zero or less.\n"
-                        << "Increase the burst time of the processes and try again." << endl;
-                        return;
-                    } else if ( selectedProcess.prioLevel > 20 || selectedProcess.prioLevel < -20 ) {
-                        cout << "The process at index " << i + 1 << " has a priority level beyond -20 or 20.\n"
-                        << "Place processes within the range -20 to 20 and try again." << endl;
-                        return;
-                    }
-                    else prioritizedIndex = i;
-               }
+                if ( prioritizedIndex == -1 || selectedProcess.prioLevel < process[prioritizedIndex].prioLevel ) prioritizedIndex = i;
             }
         }
 
@@ -339,6 +342,7 @@ void P(vector<Process> &process, int processAmount) {
         timeCont++;
         prevIdx = prioritizedIndex;
     }
+    
 
     if (prevIdx != -1) printGanttChart(timeElapsed, timeCont, prevIdx, process[prevIdx]);
 
