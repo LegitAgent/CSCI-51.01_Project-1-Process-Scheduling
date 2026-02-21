@@ -3,6 +3,7 @@
 #include <vector>
 #include <climits>
 #include <queue>
+#include <deque>
 using namespace std;
 
 struct Process {
@@ -246,13 +247,7 @@ void SRTF(vector<Process> &process, int processAmount) {
         if(process[shortestIdx].burstTime == process[shortestIdx].remainingTime) {
             process[shortestIdx].responseTime = timeElapsed - process[shortestIdx].arrivalTime;
         }
-        // increment waiting processes if they are idle and have arrived
-        for(int i = 0; i < processAmount; i++) {
-            Process& cur = process[i];
-            if(i != shortestIdx && cur.arrivalTime <= timeElapsed && !cur.finished) {
-                cur.waitingTime++;
-            }
-        }
+
         // decrement remainting for process
         process[shortestIdx].remainingTime--;
         // if the process is complete
@@ -260,6 +255,7 @@ void SRTF(vector<Process> &process, int processAmount) {
             process[shortestIdx].finished = true;
             process[shortestIdx].completionTime = timeElapsed + 1; // completed it at THIS loop so +1
             process[shortestIdx].turnaroundTime = process[shortestIdx].completionTime - process[shortestIdx].arrivalTime;
+            process[shortestIdx].waitingTime = process[shortestIdx].turnaroundTime - process[shortestIdx].burstTime;
             completed++;
         }
         // increment timers
@@ -334,10 +330,8 @@ void P(vector<Process> &process, int processAmount) {
         if (process[prioritizedIndex].remainingTime == 0) {
             process[prioritizedIndex].finished = true;
             process[prioritizedIndex].completionTime = timeElapsed + 1;
-            process[prioritizedIndex].turnaroundTime =
-                process[prioritizedIndex].completionTime - process[prioritizedIndex].arrivalTime;
-            process[prioritizedIndex].waitingTime = 
-                process[prioritizedIndex].turnaroundTime - process[prioritizedIndex].burstTime;
+            process[prioritizedIndex].turnaroundTime = process[prioritizedIndex].completionTime - process[prioritizedIndex].arrivalTime;
+            process[prioritizedIndex].waitingTime = process[prioritizedIndex].turnaroundTime - process[prioritizedIndex].burstTime;
             completed++;
         }
 
@@ -353,7 +347,75 @@ void P(vector<Process> &process, int processAmount) {
 
 // TODO:
 void RR(vector<Process> &process, int processAmount, int timeQuantum) {
-    
+    int timeElapsed = 0;
+    int timeCont = 0;
+    int completed = 0;
+
+    deque<int> processQ;
+    // fill the queue with arrivaltime == 0
+    for(int i = processAmount - 1; i >= 0; i--) {
+        Process& cur = process[i];
+        if(cur.arrivalTime == timeElapsed) {
+            processQ.push_front(i);
+        }
+    }
+    while(completed != processAmount) {
+        // no processes to run
+        if(processQ.empty()) {
+            timeElapsed++;
+            // find any new process to run if none
+            for(int i = processAmount - 1; i >= 0; i--) {
+                Process& cur = process[i];
+                if(cur.arrivalTime == timeElapsed) {
+                    processQ.push_front(i);
+                }
+            }
+            continue;
+        }
+
+        // get idx of front process
+        int idx = processQ.front();
+        processQ.pop_front(); // pop it
+        // get which run time is less
+        int processTime = timeQuantum < process[idx].remainingTime ? timeQuantum : process[idx].remainingTime;
+
+        // if the process has never been touched, then register that it has been touched
+        if(process[idx].remainingTime == process[idx].burstTime) {
+            process[idx].responseTime = timeElapsed - process[idx].arrivalTime;
+        }
+
+        // add timeElapsed by processTime
+        for(int t = 0; t < processTime; t++) {
+            process[idx].remainingTime--;
+            timeElapsed++;
+            // check if there are any other processes that will arrive while in the time quantum time
+            for(int i = processAmount - 1; i >= 0; i--) {
+                Process& cur = process[i];
+                if(cur.arrivalTime == timeElapsed) {
+                    processQ.push_front(i);
+                }
+            }
+        }
+
+        // if the process is complete
+        if(process[idx].remainingTime == 0) {
+            process[idx].finished = true;
+            process[idx].completionTime = timeElapsed;
+            process[idx].turnaroundTime = process[idx].completionTime - process[idx].arrivalTime;
+            process[idx].waitingTime = process[idx].turnaroundTime - process[idx].burstTime;
+            completed++;
+            printGanttChart(timeElapsed, processTime, idx, process[idx]);
+            continue;
+        // if the process wasn't complete then push the process index to the back of the queue
+        } else {
+            processQ.push_back(idx);
+            // if the process wasn't the same process as before, then print the gantt chart
+            if(!processQ.empty() && processQ.front() != idx) {
+                printGanttChart(timeElapsed, processTime, idx, process[idx]);
+            }
+        }
+    }
+    printStats(process, timeElapsed);
 }
 
 int main() {
