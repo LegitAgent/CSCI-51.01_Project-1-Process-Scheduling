@@ -74,7 +74,7 @@ void printStats(vector<Process> &process, int timeElapsed) {
     cout << "Average response time: " << totalResponseTime / processSize << "ns" << endl;
 }
 
-// functional, but needs to be tested
+
 void FCFS(vector<Process> &process, int processAmount) {
     int timeElapsed = 0;
     int timeCont = 0;
@@ -127,7 +127,7 @@ void FCFS(vector<Process> &process, int processAmount) {
     printStats(process, timeElapsed);
 }
 
-// TODO:
+
 void SJF(vector<Process> &process, int processAmount) {
     int timeElapsed = 0;
     int timeCont = 0;
