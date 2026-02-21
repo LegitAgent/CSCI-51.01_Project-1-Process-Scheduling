@@ -274,9 +274,68 @@ void SRTF(vector<Process> &process, int processAmount) {
     printStats(process, timeElapsed);
 }
 
-// TODO:
-void P(vector<Process> &process, int processAmount) {
 
+void P(vector<Process> &process, int processAmount) {
+    int timeElapsed = 0;
+    int timeCont = 0; // continous time for CPU
+    int completed = 0; // completed processes
+
+    int prevIdx = -1;
+
+    while (completed != processAmount) {
+        int prioritizedIndex = -1;
+
+        for (int i = 0; i < processAmount; i++) {
+            Process& selectedProcess = process[i];
+            // find the process that arrived and that have not reached remaining time of zero
+            if( selectedProcess.arrivalTime <= timeElapsed && selectedProcess.remainingTime > 0 ) {
+            // check if priority level of the selected process is less than the one currently prioritized, or initializes it to zero if still in -1   
+                if ( prioritizedIndex == -1 || selectedProcess.prioLevel < process[prioritizedIndex].prioLevel ) {
+            // check if process that got selected has a priority within -20 to 20.
+                    if ( selectedProcess.prioLevel > 20 || selectedProcess.prioLevel < -20 ) {
+                        cout << "The process at index " << i + 1 << " has a priority level beyond -20 or 20.\n"
+                        << "Place processes within the range -20 to 20 and try again." << endl;
+                        return;
+                    }
+                    else prioritizedIndex = i;
+               }
+            }
+        }
+
+        // cpu is idle, no process in ready queue
+        if (prioritizedIndex == -1) {
+            timeElapsed++;
+            continue;
+        }
+
+        // if the process is different, print previous
+        if (prioritizedIndex != prevIdx) {
+            if (prevIdx != -1) printGanttChart(timeElapsed, timeCont, prevIdx, process[prevIdx]);
+            timeCont = 0;
+        }
+
+        // decrement remainting for process
+        process[prioritizedIndex].remainingTime--;
+
+        // if the process is complete
+        if (process[prioritizedIndex].remainingTime == 0) {
+            process[prioritizedIndex].finished = true;
+            process[prioritizedIndex].completionTime = timeElapsed + 1;
+            process[prioritizedIndex].turnaroundTime =
+                process[prioritizedIndex].completionTime - process[prioritizedIndex].arrivalTime;
+            process[prioritizedIndex].waitingTime = 
+                process[prioritizedIndex].turnaroundTime - process[prioritizedIndex].burstTime;
+            completed++;
+        }
+
+        timeElapsed++;
+        timeCont++;
+        prevIdx = prioritizedIndex;
+    }
+
+    if (prevIdx != -1) printGanttChart(timeElapsed, timeCont, prevIdx, process[prevIdx]);
+
+    printStats(process, timeElapsed);
 }
 
 // TODO:
