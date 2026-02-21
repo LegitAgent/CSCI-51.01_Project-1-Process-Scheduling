@@ -292,7 +292,15 @@ void P(vector<Process> &process, int processAmount) {
             // check if priority level of the selected process is less than the one currently prioritized, or initializes it to zero if still in -1   
                 if ( prioritizedIndex == -1 || selectedProcess.prioLevel < process[prioritizedIndex].prioLevel ) {
             // check if process that got selected has a priority within -20 to 20.
-                    if ( selectedProcess.prioLevel > 20 || selectedProcess.prioLevel < -20 ) {
+                    if ( selectedProcess.arrivalTime < 0 ) {
+                        cout << "The process at index " << i + 1 << " has gone back in time!\n"
+                        << "Retrieve the processes from the past and try again." << endl;
+                        return;
+                    } else if ( selectedProcess.burstTime < 1 ) {
+                        cout << "The process at index " << i + 1 << " has a burst time of zero or less.\n"
+                        << "Increase the burst time of the processes and try again." << endl;
+                        return;
+                    } else if ( selectedProcess.prioLevel > 20 || selectedProcess.prioLevel < -20 ) {
                         cout << "The process at index " << i + 1 << " has a priority level beyond -20 or 20.\n"
                         << "Place processes within the range -20 to 20 and try again." << endl;
                         return;
@@ -312,6 +320,11 @@ void P(vector<Process> &process, int processAmount) {
         if (prioritizedIndex != prevIdx) {
             if (prevIdx != -1) printGanttChart(timeElapsed, timeCont, prevIdx, process[prevIdx]);
             timeCont = 0;
+        }
+
+        // if the process has never been touched, then register that it has been touched
+        if(process[prioritizedIndex].burstTime == process[prioritizedIndex].remainingTime) {
+            process[prioritizedIndex].responseTime = timeElapsed - process[prioritizedIndex].arrivalTime;
         }
 
         // decrement remainting for process
@@ -340,7 +353,7 @@ void P(vector<Process> &process, int processAmount) {
 
 // TODO:
 void RR(vector<Process> &process, int processAmount, int timeQuantum) {
-
+    
 }
 
 int main() {
